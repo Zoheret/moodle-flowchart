@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>תרשים זרימה - תהליך רישום לקורס</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            direction: rtl;
+        }
+
+        .flowchart-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .flowchart-title {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 30px;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .flowchart {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            position: relative;
+        }
+
+        .flow-box {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            font-weight: 500;
+            position: relative;
+            min-width: 200px;
+            border: none;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .flow-box:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.2);
+        }
+
+        .flow-box.start {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .flow-box.decision {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            clip-path: polygon(0% 50%, 15% 0%, 85% 0%, 100% 50%, 85% 100%, 15% 100%);
+            min-width: 250px;
+        }
+
+        .flow-box.process {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        .flow-box.end {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            border-radius: 50px;
+        }
+
+        .arrow {
+            width: 0;
+            height: 0;
+            border-left: 15px solid transparent;
+            border-right: 15px solid transparent;
+            border-top: 20px solid #34495e;
+            margin: 10px auto;
+            position: relative;
+        }
+
+        .arrow::after {
+            content: '';
+            position: absolute;
+            top: -25px;
+            right: -2px;
+            width: 4px;
+            height: 30px;
+            background: #34495e;
+        }
+
+        .flow-row {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .branch-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .branch-label {
+            background: #34495e;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .info-section {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-right: 4px solid #007bff;
+        }
+
+        @media (max-width: 768px) {
+            .flow-row {
+                flex-direction: column;
+                gap: 20px;
+            }
+            
+            .flowchart-container {
+                padding: 20px;
+            }
+            
+            .flow-box {
+                min-width: 180px;
+                font-size: 14px;
+            }
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            }
+            50% {
+                box-shadow: 0 8px 25px rgba(79, 172, 254, 0.4);
+            }
+            100% {
+                box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="flowchart-container">
+        <h1 class="flowchart-title">תהליך רישום לקורס</h1>
+        
+        <div class="flowchart">
+            <!-- התחלה -->
+            <div class="flow-box start pulse">
+                התחל תהליך רישום
+            </div>
+            
+            <div class="arrow"></div>
+            
+            <!-- החלטה ראשונה -->
+            <div class="flow-box decision">
+                האם יש לך חשבון משתמש?
+            </div>
+            
+            <div class="arrow"></div>
+            
+            <!-- שתי אפשרויות -->
+            <div class="flow-row">
+                <div class="branch-container">
+                    <div class="branch-label">כן</div>
+                    <a href="#login" class="flow-box process">
+                        התחבר לחשבון
+                    </a>
+                </div>
+                
+                <div class="branch-container">
+                    <div class="branch-label">לא</div>
+                    <a href="#register" class="flow-box process">
+                        צור חשבון חדש
+                    </a>
+                </div>
+            </div>
+            
+            <div class="arrow"></div>
+            
+            <!-- תהליך -->
+            <div class="flow-box process">
+                עיין ברשימת הקורסים הזמינים
+            </div>
+            
+            <div class="arrow"></div>
+            
+            <!-- החלטה שנייה -->
+            <div class="flow-box decision">
+                בחר קורס מתאים
+            </div>
+            
+            <div class="arrow"></div>
+            
+            <!-- בדיקת תנאים -->
+            <div class="flow-box decision">
+                האם עומד בתנאי הקדם?
+            </div>
+            
+            <div class="arrow"></div>
+            
+            <div class="flow-row">
+                <div class="branch-container">
+                    <div class="branch-label">כן</div>
+                    <div class="flow-box process">
+                        בצע רישום לקורס
+                    </div>
+                </div>
+                
+                <div class="branch-container">
+                    <div class="branch-label">לא</div>
+                    <div class="flow-box process">
+                        השלם קורסי הכנה
+                    </div>
+                </div>
+            </div>
+            
+            <div class="arrow"></div>
+            
+            <!-- סיום -->
+            <div class="flow-box end">
+                רישום הושלם בהצלחה!
+            </div>
+        </div>
+
+        <div class="info-section">
+            <h3 style="color: #2c3e50; margin-bottom: 15px;">טיפים חשובים לרישום:</h3>
+            <ul style="text-align: right; color: #34495e; line-height: 1.6;">
+                <li>וודא שיש לך כתובת מייל תקינה לקבלת הודעות</li>
+                <li>בדוק את תאריכי תחילת וסיום הקורס</li>
+                <li>קרא בעיון את דרישות הקורס ותנאי הקדם</li>
+                <li>שמור את פרטי ההתחברות שלך במקום בטוח</li>
+                <li>במקרה של בעיות טכניות, פנה לתמיכה</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
