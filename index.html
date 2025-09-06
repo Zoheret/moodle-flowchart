@@ -11,19 +11,24 @@
       --lvl1:#a78bfa; --lvl2:#60a5fa; --lvl3:#34d399; --lvl4:#22d3ee;
       --txt:#e5e7eb;
 
-      /* סקלת גודל כוללת (A+/A−) — משפיעה רק על גובה/פונט/ריווח, לא על רוחב */
-      --k: 1.45; /* אפשר לשנות ל-1.35/1.6 לפי הטעם */
+      /* שמירה על הפונטים הקיימים (כמו קודם) */
+      --fs-base:14px;
+      --fs-l1:1.6;   /* כותרת ראשית */
+      --fs-l2:1.4;   /* פרקי ביניים (כחול) */
+      --fs-l3:1.2;   /* ירוקים */
+      --fs-l4:1.05;  /* טורקיז (קישורים) */
 
-      /* מידות בסיס */
-      --w0:200px; --pad0:12px; --gap0:60px; --v-gap0:50px; --radius0:16px; --fs0:14px; --shadow:0 6px 18px rgba(0,0,0,.25);
+      /* ריווח כללי בין עמודות ושכבות */
+      --gap:60px;
+      --v-gap:50px;
 
-      /* מידות מחושבות — שימי לב: רוחב נשאר קבוע */
-      --w: var(--w0);                              /* ← רוחב קופסה לא משתנה */
-      --pad: calc(var(--pad0) * var(--k));         /* ↑ עבה יותר לגובה */
-      --gap: var(--gap0);                          /* אין הרחבה לצדדים */
-      --v-gap: calc(var(--v-gap0) * var(--k));     /* ↑ ריווח אנכי */
-      --radius: var(--radius0);
-      --fs: calc(var(--fs0) * var(--k));           /* ↑ פונט גדול יותר */
+      /* ⬅️ הגדלת רוחב הצמתים + קיצור לגובה */
+      --node-w: 280px;     /* היה ~200px */
+      --pad-x: 18px;       /* יותר רווח לצדדים */
+      --pad-y: 10px;       /* פחות רווח אנכי כדי לקצר לגובה */
+      --radius:16px;
+
+      --shadow:0 6px 18px rgba(0,0,0,.25);
     }
 
     *{box-sizing:border-box}
@@ -31,28 +36,19 @@
     body{
       margin:0; font-family:"Rubik","Segoe UI",Tahoma,Arial,Helvetica,sans-serif;
       background:linear-gradient(135deg,#0f172a 0%,#111827 60%,#0b1226 100%); color:var(--txt);
-      padding:0;
     }
 
     .wrap{width:100vw; height:100vh; display:flex; flex-direction:column; gap:8px}
 
     .toolbar{
       padding:10px 18px;
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      gap:12px;
+      display:flex; justify-content:space-between; align-items:center; gap:12px;
     }
     .title{font-weight:700}
 
     .zoom-controls button{
-      margin-inline-start:8px;
-      padding:4px 10px;
-      border-radius:8px;
-      border:1px solid #334155;
-      background:#0b1226;
-      color:var(--txt);
-      cursor:pointer;
+      margin-inline-start:8px; padding:4px 10px; border-radius:8px;
+      border:1px solid #334155; background:#0b1226; color:var(--txt); cursor:pointer;
     }
     .zoom-controls button:hover{filter:brightness(1.2)}
 
@@ -66,45 +62,48 @@
 
     .layer{position:relative; display:flex; justify-content:center; gap:var(--gap); margin-bottom:var(--v-gap); z-index:2}
 
+    /* שכבת הפרקים (כחול) – להרחיק לצדדים כדי לשבת מעל העמודות הירוקות */
+    #L2{
+      justify-content:space-between;           /* דוחף ימין/שמאל */
+      padding-inline: calc(var(--gap) * 2);    /* שוליים פנימיים נעימים */
+      gap: 0;                                  /* נבטל gap בין שני הכחולים */
+    }
+
+    /* שכבת העמודות – 7 עמודות קבועות ברוחב נתון, לא נמתחות לרוחב */
     .layer.grid{
       display:grid;
-      grid-template-columns: repeat(auto-fit, minmax(var(--w), var(--w)));
-      justify-content: space-evenly;  /* לא מותחים לצדדים */
+      grid-template-columns: repeat(auto-fit, minmax(var(--node-w), var(--node-w)));
+      justify-content:center;                  /* מרכז את הגריד */
       gap: var(--gap);
     }
 
     .node{
-      position:relative; z-index:3;               /* הצמתים מעל הקווים */
-      width:var(--w);
-      padding:var(--pad);
+      position:relative; z-index:3;
+      width:var(--node-w);
+      padding: var(--pad-y) var(--pad-x);
       border-radius:var(--radius);
       background:#0b1226; color:var(--txt);
       text-align:center;
-
-      font-size:var(--fs);
-      line-height:1.5;                            /* יותר ירידות שורה */
-      white-space:normal;
-      overflow-wrap:break-word; word-break:normal;/* שבירת מילים ארוכות */
-      min-height:64px;                            /* “עבה” ונעים גם בטקסט קצר */
-
+      font-size:var(--fs-base);
+      line-height:1.35;                        /* מעט צפוף יותר כדי לקצר לגובה */
+      white-space:normal; overflow-wrap:break-word; word-break:normal;
       box-shadow:var(--shadow);
+      min-height:56px;
     }
 
-    /* היררכיית גדלים בין שכבות (גדול – אבל לא מרחיב לרוחב) */
-    .lvl1{background:linear-gradient(135deg,#6d28d9,#8b5cf6); font-size:calc(var(--fs)*1.6)}
-    .lvl2{background:linear-gradient(135deg,#2563eb,#60a5fa); font-size:calc(var(--fs)*1.4)}
-    .lvl3{background:linear-gradient(135deg,#059669,#34d399); font-size:calc(var(--fs)*1.2)}
+    .lvl1{background:linear-gradient(135deg,#6d28d9,#8b5cf6); font-size:calc(var(--fs-base) * var(--fs-l1))}
+    .lvl2{background:linear-gradient(135deg,#2563eb,#60a5fa); font-size:calc(var(--fs-base) * var(--fs-l2))}
+    .lvl3{background:linear-gradient(135deg,#059669,#34d399); font-size:calc(var(--fs-base) * var(--fs-l3))}
     .lvl4{
-      background:linear-gradient(135deg,#0891b2,#22d3ee);
-      color:#042430;
-      font-size:calc(var(--fs)*1.05);
-      min-height:58px;
+      background:linear-gradient(135deg,#0891b2,#22d3ee); color:#042430;
+      font-size:calc(var(--fs-base) * var(--fs-l4));
+      min-height:50px;
     }
 
     a.node{text-decoration:underline; display:block; cursor:pointer}
     a.node:hover{ text-decoration:none; filter:brightness(1.1) }
 
-    .subcol{display:flex; flex-direction:column; align-items:center; gap:16px}
+    .subcol{display:flex; flex-direction:column; align-items:center; gap:14px}
     .subcol .node.lvl4{margin-top:6px}
   </style>
 </head>
@@ -120,7 +119,6 @@
 
     <div class="stage">
       <div class="canvas" id="canvas">
-        <!-- שכבת הקשתות -->
         <svg class="edges" id="edges" xmlns="http://www.w3.org/2000/svg"></svg>
 
         <!-- שכבה 1 -->
@@ -137,39 +135,39 @@
         <!-- שכבה 3 + שכבה 4 -->
         <div class="layer grid" id="L3">
           <div class="subcol" id="col_c2_homo_const">
-            <div class="node lvl3" id="c2_homo_const">מד"ר לינארית הומוגנית – מקדמים קבועים </div>
+            <div class="node lvl3" id="c2_homo_const">מד"ר לינארית הומוגנית – מקדמים קבועים</div>
             <a href="https://opal.openu.ac.il/mod/combopage/view.php?id=6756889" class="node lvl4" id="c2_hc_i1">יחידות הלימוד</a>
             <a href="https://opal.openu.ac.il/mod/combopage/view.php?id=6756892" class="node lvl4" id="c2_hc_i2">דרך הפתרון</a>
             <a href="https://opal.openu.ac.il/mod/combopage/view.php?id=6756855&from=topNext" class="node lvl4" id="c2_hc_i3">טבלה 2.4.2</a>
             <a href="https://opal.openu.ac.il/mod/combopage/view.php?id=6756856&from=topNext" class="node lvl4" id="c2_hc_i4">דוגמאות</a>
-            <a href="https://opal.openu.ac.il/mod/combopage/view.php?id=6827875&from=topNext" class="node lvl4" id="c2_hc_i5">דוגמה - משוואת אוילר </a> 
+            <a href="https://opal.openu.ac.il/mod/combopage/view.php?id=6827875&from=topNext" class="node lvl4" id="c2_hc_i5">דוגמה - משוואת אוילר</a>
           </div>
 
           <div class="subcol" id="col_c2_inh_const">
-            <div class="node lvl3" id="c2_inh_const">מד"ר לינארית אי-הומוגנית - מקדמים קבועים</div>
-            <a href="https://opal.openu.ac.il/mod/combopage/view.php?id=6758079" class="node lvl4" id="c2_ic_i1">השוואת מקדמים - יחידות הלימוד</a>
-            <a href="https://opal.openu.ac.il/mod/combopage/view.php?id=6757237&from=topNext" class="node lvl4" id="c2_ic_i2"> השוואת מקדמים - דרך הפתרון</a>
-            <a href="https://opal.openu.ac.il/mod/combopage/view.php?id=6757238&from=topNext" class="node lvl4" id="c2_ic_i3">השוואת מקדמים - צורת הפתרון הפרטי</a>
-            <a href="https://opal.openu.ac.il/mod/combopage/view.php?id=6827902&from=topNext" class="node lvl4" id="c2_ic_i4">השוואת מקדמים - דוגמה</a>
+            <div class="node lvl3" id="c2_inh_const">מד"ר לינארית אי-הומוגנית – מקדמים קבועים</div>
+            <a href="https://opal.openu.ac.il/mod/combopage/view.php?id=6758079" class="node lvl4" id="c2_ic_i1">השוואת מקדמים – יחידות הלימוד</a>
+            <a href="https://opal.openu.ac.il/mod/combopage/view.php?id=6757237&from=topNext" class="node lvl4" id="c2_ic_i2">השוואת מקדמים – דרך הפתרון</a>
+            <a href="https://opal.openu.ac.il/mod/combopage/view.php?id=6757238&from=topNext" class="node lvl4" id="c2_ic_i3">השוואת מקדמים – צורת הפתרון הפרטי</a>
+            <a href="https://opal.openu.ac.il/mod/combopage/view.php?id=6827902&from=topNext" class="node lvl4" id="c2_ic_i4">השוואת מקדמים – דוגמה</a>
           </div>
 
           <div class="subcol" id="col_c2_inh_cont">
-            <div class="node lvl3" id="c2_inh_cont">מד"ר לינארית אי-הומוגנית - מקדמים רציפים</div>
-            <a href="https://opal.openu.ac.il/mod/combopage/view.php?id=6758080" class="node lvl4" id="c2_ir_i1">וריאציית הפרמטרים - יחידות הלימוד</a>
-            <a href="https://opal.openu.ac.il/mod/combopage/view.php?id=6757256&from=topNext" class="node lvl4" id="c2_ir_i2">וריאציית הפרמטרים - אינטואיציה</a>
-            <a href="https://opal.openu.ac.il/mod/combopage/view.php?id=6827896&from=topNext" class="node lvl4" id="c2_ir_i3">וריאציית הפרמטרים - דרך הפתרון</a>
-            <a href="https://opal.openu.ac.il/mod/combopage/view.php?id=6827876&from=topNext" class="node lvl4" id="c2_ir_i4">וריאציית הפרמטרים - דוגמה</a>
+            <div class="node lvl3" id="c2_inh_cont">מד"ר לינארית אי-הומוגנית – מקדמים רציפים</div>
+            <a href="https://opal.openu.ac.il/mod/combopage/view.php?id=6758080" class="node lvl4" id="c2_ir_i1">וריאציית הפרמטרים – יחידות הלימוד</a>
+            <a href="https://opal.openu.ac.il/mod/combopage/view.php?id=6757256&from=topNext" class="node lvl4" id="c2_ir_i2">וריאציית הפרמטרים – אינטואיציה</a>
+            <a href="https://opal.openu.ac.il/mod/combopage/view.php?id=6827896&from=topNext" class="node lvl4" id="c2_ir_i3">וריאציית הפרמטרים – דרך הפתרון</a>
+            <a href="https://opal.openu.ac.il/mod/combopage/view.php?id=6827876&from=topNext" class="node lvl4" id="c2_ir_i4">וריאציית הפרמטרים – דוגמה</a>
           </div>
 
           <div class="subcol" id="col_c2_reduce">
-            <div class="node lvl3" id="c2_reduce">הורדת סדר המשוואה – מסדר שני לסדר ראשון</div>     
-            <a href="https://opal.openu.ac.il/mod/combopage/view.php?id=6832091" class="node lvl4" id="c2_rd_i1">משוואה חסרה מטיפוס 1 - יחידות הלימוד</a>
-            <a href="https://opal.openu.ac.il/mod/combopage/view.php?id=6832089&from=topNext" class="node lvl4" id="c2_rd_i2">משוואה חסרה מטיפוס 1 - דרך הפתרון ודוגמה</a>
-            <a href="https://opal.openu.ac.il/mod/combopage/view.php?id=6832107&from=topNext" class="node lvl4" id="c2_rd_i3">משוואה חסרה מטיפוס 2 - יחידות הלמוד</a>
-            <a href="https://opal.openu.ac.il/mod/combopage/view.php?id=6832087&from=topNext" class="node lvl4" id="c2_rd_i4">משוואה חסרה מטיפוס 2 - דרך הפתרון ודוגמה</a>
-            <a href="https://opal.openu.ac.il/mod/combopage/view.php?id=6832085&from=topNext" class="node lvl4" id="c2_rd_i5">הורדת סדר בעזרת פתרון ידוע - יחידות הלימוד</a>
-            <a href="https://opal.openu.ac.il/mod/combopage/view.php?id=6832081&from=topNext" class="node lvl4" id="c2_rd_i6">הורדת סדר בעזרת פתרון ידוע - דרך הפתרון </a>
-            <a href="https://opal.openu.ac.il/mod/combopage/view.php?id=6832083&from=topNext" class="node lvl4" id="c2_rd_i7">הורדת סדר בעזרת פתרון ידוע - דוגמה </a>
+            <div class="node lvl3" id="c2_reduce">הורדת סדר המשוואה – מסדר שני לסדר ראשון</div>
+            <a href="https://opal.openu.ac.il/mod/combopage/view.php?id=6832091" class="node lvl4" id="c2_rd_i1">משוואה חסרה מטיפוס 1 – יחידות הלימוד</a>
+            <a href="https://opal.openu.ac.il/mod/combopage/view.php?id=6832089&from=topNext" class="node lvl4" id="c2_rd_i2">משוואה חסרה מטיפוס 1 – דרך הפתרון ודוגמה</a>
+            <a href="https://opal.openu.ac.il/mod/combopage/view.php?id=6832107&from=topNext" class="node lvl4" id="c2_rd_i3">משוואה חסרה מטיפוס 2 – יחידות הלימוד</a>
+            <a href="https://opal.openu.ac.il/mod/combopage/view.php?id=6832087&from=topNext" class="node lvl4" id="c2_rd_i4">משוואה חסרה מטיפוס 2 – דרך הפתרון ודוגמה</a>
+            <a href="https://opal.openu.ac.il/mod/combopage/view.php?id=6832085&from=topNext" class="node lvl4" id="c2_rd_i5">הורדת סדר בעזרת פתרון ידוע – יחידות הלימוד</a>
+            <a href="https://opal.openu.ac.il/mod/combopage/view.php?id=6832081&from=topNext" class="node lvl4" id="c2_rd_i6">הורדת סדר בעזרת פתרון ידוע – דרך הפתרון</a>
+            <a href="https://opal.openu.ac.il/mod/combopage/view.php?id=6832083&from=topNext" class="node lvl4" id="c2_rd_i7">הורדת סדר בעזרת פתרון ידוע – דוגמה</a>
           </div>
 
           <div class="subcol" id="col_c3_homo_const">
@@ -182,19 +180,19 @@
           </div>
 
           <div class="subcol" id="col_c3_inh_const">
-            <div class="node lvl3" id="c3_inh_const">מד"ר לינארית אי-הומוגנית - מקדמים קבועים (n)</div>
-            <a href="https://opal.openu.ac.il/mod/combopage/view.php?id=6758152&from=topPrev" class="node lvl4" id="c3_ic_i1"> סדר גבוה - השוואת מקדמים - יחידות הלימוד</a>
-            <a href="https://opal.openu.ac.il/mod/combopage/view.php?id=6757245&from=topNext" class="node lvl4" id="c3_ic_i2">סדר גבוה - השוואת מקדמים -דרך הפתרון</a>
-            <a href="https://opal.openu.ac.il/mod/combopage/view.php?id=6757246&from=topNext" class="node lvl4" id="c3_ic_i3">סדר גבוה - השוואת מקדמים - צורת הפתרון הפרטי</a>
-            <a href="https://opal.openu.ac.il/mod/combopage/view.php?id=6757243&from=topNext" class="node lvl4" id="c3_ic_i4">סדר גבוה - השוואת מקדמים - דוגמה</a>
+            <div class="node lvl3" id="c3_inh_const">מד"ר לינארית אי-הומוגנית – מקדמים קבועים (n)</div>
+            <a href="https://opal.openu.ac.il/mod/combopage/view.php?id=6758152&from=topPrev" class="node lvl4" id="c3_ic_i1">סדר גבוה – השוואת מקדמים – יחידות הלימוד</a>
+            <a href="https://opal.openu.ac.il/mod/combopage/view.php?id=6757245&from=topNext" class="node lvl4" id="c3_ic_i2">סדר גבוה – השוואת מקדמים – דרך הפתרון</a>
+            <a href="https://opal.openu.ac.il/mod/combopage/view.php?id=6757246&from=topNext" class="node lvl4" id="c3_ic_i3">סדר גבוה – צורת הפתרון הפרטי</a>
+            <a href="https://opal.openu.ac.il/mod/combopage/view.php?id=6757243&from=topNext" class="node lvl4" id="c3_ic_i4">סדר גבוה – דוגמה</a>
           </div>
 
           <div class="subcol" id="col_c3_inh_cont">
-            <div class="node lvl3" id="c3_inh_cont">מד"ר לינארית אי-הומוגנית - מקדמים רציפים (n)</div>
-            <a href="https://opal.openu.ac.il/mod/combopage/view.php?id=6758154" class="node lvl4" id="c3_ir_i1">סדר גבוה - וריאציית הפרמטרים - יחידות הלימוד</a>
-            <a href="https://opal.openu.ac.il/mod/combopage/view.php?id=6757255&from=topNext" class="node lvl4" id="c3_ir_i2">סדר גבוה - וריאציית הפרמטרים - אינטואיציה</a>
-            <a href="https://opal.openu.ac.il/mod/combopage/view.php?id=6761715&from=topNext" class="node lvl4" id="c3_ir_i3">סדר גבוה - וריאציית הפרמטרים - דרך הפתרון</a>
-            <a href="https://opal.openu.ac.il/mod/combopage/view.php?c=312647#p573761" class="node lvl4" id="c3_ir_i4">סדר גבוה - וריאציית הפרמטרים - דוגמה</a>
+            <div class="node lvl3" id="c3_inh_cont">מד"ר לינארית אי-הומוגנית – מקדמים רציפים (n)</div>
+            <a href="https://opal.openu.ac.il/mod/combopage/view.php?id=6758154" class="node lvl4" id="c3_ir_i1">סדר גבוה – וריאציית הפרמטרים – יחידות הלימוד</a>
+            <a href="https://opal.openu.ac.il/mod/combopage/view.php?id=6757255&from=topNext" class="node lvl4" id="c3_ir_i2">סדר גבוה – וריאציית הפרמטרים – אינטואיציה</a>
+            <a href="https://opal.openu.ac.il/mod/combopage/view.php?id=6761715&from=topNext" class="node lvl4" id="c3_ir_i3">סדר גבוה – וריאציית הפרמטרים – דרך הפתרון</a>
+            <a href="https://opal.openu.ac.il/mod/combopage/view.php?c=312647#p573761" class="node lvl4" id="c3_ir_i4">סדר גבוה – וריאציית הפרמטרים – דוגמה</a>
           </div>
         </div>
       </div>
@@ -273,23 +271,18 @@
       };
     })();
 
-    /* האזנות לזום/גלילה של viewport (כולל pinch-zoom) */
     if (window.visualViewport) {
       visualViewport.addEventListener('resize', scheduleDraw);
       visualViewport.addEventListener('scroll',  scheduleDraw);
     }
-
-    /* שינויי פריסה/גודל של הקאנבס עצמו */
     new ResizeObserver(scheduleDraw).observe(canvas);
 
-    /* Ctrl + / Ctrl - / Ctrl 0 – לחשב מחדש אחרי שינוי הזום */
     document.addEventListener('keydown', (e) => {
       if ((e.ctrlKey || e.metaKey) && ['+','-','0','='].includes(e.key)) {
         setTimeout(scheduleDraw, 50);
       }
     });
 
-    /* fallback: שינוי devicePixelRatio (זום) */
     let lastDPR = window.devicePixelRatio;
     setInterval(() => {
       if (window.devicePixelRatio !== lastDPR) {
@@ -298,18 +291,15 @@
       }
     }, 250);
 
-    /* כפתורי A+/A− – משנים רק גובה/פונט/ריווח, לא רוחב */
+    /* כפתורי A+/A− – שינוי פונט בלבד (אם תרצי) */
     const rootStyle = document.documentElement.style;
-    const getK = () => parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--k')) || 1;
-    const setK = (v) => { v = Math.max(1.0, Math.min(1.8, v)); rootStyle.setProperty('--k', v); scheduleDraw(); };
-
+    const base = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--fs-base')) || 14;
     const zin  = document.getElementById('zin');
     const zout = document.getElementById('zout');
-    if (zin)  zin.addEventListener('click',  () => setK(getK() + 0.1));
-    if (zout) zout.addEventListener('click', () => setK(getK() - 0.1));
+    if (zin)  zin.addEventListener('click',  () => { rootStyle.setProperty('--fs-base', (parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--fs-base'))+1)+'px'); scheduleDraw(); });
+    if (zout) zout.addEventListener('click', () => { rootStyle.setProperty('--fs-base', Math.max(12, parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--fs-base'))-1)+'px'); scheduleDraw(); });
 
-    /* ציור ראשון */
-    window.addEventListener('load', () => scheduleDraw());
+    window.addEventListener('load', scheduleDraw);
     window.addEventListener('resize', scheduleDraw);
   </script>
 </body>
