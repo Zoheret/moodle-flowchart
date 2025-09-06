@@ -40,7 +40,13 @@
     .edges{position:absolute; inset:0; z-index:0; pointer-events:none}
 
     .layer{position:relative; display:flex; justify-content:center; gap:var(--gap); margin-bottom:var(--v-gap); z-index:1}
-    .layer.grid6{display:grid; grid-template-columns:repeat(6, var(--w)); justify-content:center; gap:var(--gap); z-index:1}
+    .layer.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit, minmax(var(--w), var(--w)));
+  justify-content:center;
+  gap:var(--gap);
+}
+
 
     .node{
       position:relative; z-index:2;  /* חשוב: הצמתים מעל הקווים */
@@ -89,7 +95,7 @@ a.node:hover {
         </div>
 
         <!-- שכבה 3 + שכבה 4 (8 בנים לכל נכד) -->
-        <div class="layer grid6" id="L3">
+        <div class="layer grid" id="L3">
           <div class="subcol" id="col_c2_homo_const">
             <div class="node lvl3" id="c2_homo_const">מד"ר לינארית הומוגנית – מקדמים קבועים </div>
             <a href="https://opal.openu.ac.il/mod/combopage/view.php?id=6756889" class="node lvl4" id="c2_hc_i1">יחידות הלימוד</a>
