@@ -15,13 +15,24 @@
   /* מידות בסיס */
   --w0:200px; --pad0:12px; --gap0:60px; --v-gap0:50px; --radius0:16px; --fs0:14px; --shadow:0 6px 18px rgba(0,0,0,.25);
 
-  /* מידות מחושבות לפי הסקיילר */
-  --w: calc(var(--w0) * var(--k));
-  --pad: calc(var(--pad0) * var(--k));
-  --gap: calc(var(--gap0) * var(--k));
-  --v-gap: calc(var(--v-gap0) * var(--k));
-  --radius: calc(var(--radius0) * var(--k));
-  --fs: calc(var(--fs0) * var(--k));
+   /* לא מרחיבים לרוחב – משאירים את הרוחב המקורי */
+  --w: var(--w0);
+
+  /* יותר “עבה” לגובה (ריווח פנימי), בלי להרחיב לרוחב */
+  --pad: calc(var(--pad0) * 1.6);
+
+  /* ריווח אופקי בין עמודות נשאר (לא מרחיבות לצדדים) */
+  --gap: var(--gap0);
+
+  /* ריווח אנכי בין שכבות – יותר מרווח כלפי מטה */
+  --v-gap: calc(var(--v-gap0) * 1.6); /* אפשר 1.7–1.9 אם תרצי עוד מרווח */
+
+  /* פינות ושאר פרמטרים נשארים */
+  --radius: var(--radius0);
+
+  /* הגדלת פונט כללית (בלי להרחיב לרוחב) */
+  --fs: calc(var(--fs0) * 1.45); /* אפשר להעלות/להוריד את המקדם */
+
 }
 
 
@@ -71,18 +82,46 @@
 
 
     .node{
-      position:relative; z-index:2;  /* חשוב: הצמתים מעל הקווים */
-      width:var(--w); padding:var(--pad); border-radius:var(--radius);
-      background:#0b1226; color:var(--txt); text-align:center; font-size:var(--fs);
-      box-shadow:var(--shadow);
-    }
+  position:relative; z-index:2;
+  width:var(--w);
+  /* יותר גובה פנימי – עבה יותר */
+  padding:var(--pad);
+  border-radius:var(--radius);
+  background:#0b1226; color:var(--txt);
+  text-align:center;
+
+  /* טקסט גדול יותר (מה־:root), עם יותר גובה שורה */
+  font-size:var(--fs);
+  line-height:1.5;
+
+  /* לגלישה לשורות נוספות (לא חותך לרוחב) */
+  white-space:normal;
+  overflow-wrap:break-word;   /* מאפשר שבירה טבעית של מילים ארוכות */
+  word-break:normal;
+
+  /* גובה מינימלי נעים כדי שיראה “עבה” גם בטקסט קצר */
+  min-height:64px;
+
+  box-shadow:var(--shadow);
+}
+
     .lvl1{background:linear-gradient(135deg,#6d28d9,#8b5cf6)}
     .lvl2{background:linear-gradient(135deg,#2563eb,#60a5fa)}
     .lvl3{background:linear-gradient(135deg,#059669,#34d399)}
-    .lvl4{background:linear-gradient(135deg,#0891b2,#22d3ee); color:#042430; font-size:13px;}
+    .lvl4{
+  background:linear-gradient(135deg,#0891b2,#22d3ee);
+  color:#042430;
+  font-size:calc(var(--fs) * 0.95);  /* גדול יותר מ־13px, ועדיין מעט קטן מהכותרות */
+  min-height:58px;                   /* עבה יותר גם כשיש שורה אחת */
+}
+
     a.node{text-decoration:none; display:block}
 
-    .subcol{display:flex; flex-direction:column; align-items:center; gap:10px}
+    .subcol{
+  display:flex; flex-direction:column; align-items:center;
+  gap:16px;  /* היה 10px – מגדיל כלפי מטה */
+}
+
     .subcol .node.lvl4{margin-top:6px}
     a.node {
   text-decoration: underline;   /* קו תחתון לקישורים */
@@ -269,11 +308,41 @@ const scheduleDraw = (() => {
 // שינוי גודל חלון (ברוב הדפדפנים גם בזום)
 window.addEventListener('resize', scheduleDraw);
 
-// אם יש visualViewport (כרום/מובייל) – שינויי זום ו־pinch מדווחים כאן
-if (window.visualViewport) {
-  visualViewport.addEventListener('resize', scheduleDraw);
-  visualViewport.addEventListener('scroll', scheduleDraw); // בעת pinch-zoom ה־viewport זז
-}
+  <!-- …כל הקוד שלך למעלה נשאר… -->
+
+  <!-- האזנות לזום/גלילה + התאמות בטוחות -->
+  <script>
+    // האזנות לזום/גלילה של viewport (כולל pinch-zoom במובייל) - עם בדיקת תמיכה
+    if (window.visualViewport) {
+      visualViewport.addEventListener('resize', scheduleDraw);
+      visualViewport.addEventListener('scroll',  scheduleDraw);
+    }
+
+    // שינויי פריסה/גודל של הקנבס עצמו
+    new ResizeObserver(scheduleDraw).observe(canvas);
+
+    // Ctrl + / Ctrl - / Ctrl 0 (וגם '=' במקלדות מסוימות) – לחשב מחדש אחרי שינוי הזום
+    document.addEventListener('keydown', (e) => {
+      if ((e.ctrlKey || e.metaKey) && ['+','-','0','='].includes(e.key)) {
+        setTimeout(scheduleDraw, 50);
+      }
+    });
+
+    // fallback: זיהוי שינוי devicePixelRatio (זום) גם אם אין visualViewport
+    let lastDPR = window.devicePixelRatio;
+    setInterval(() => {
+      if (window.devicePixelRatio !== lastDPR) {
+        lastDPR = window.devicePixelRatio;
+        scheduleDraw();
+      }
+    }, 250);
+
+    // ציור ראשון
+    window.addEventListener('load', () => scheduleDraw());
+  </script>
+</body>
+</html>
+
 
 // השגחת גודל הקנבס/פריסות
 new ResizeObserver(scheduleDraw).observe(canvas);
