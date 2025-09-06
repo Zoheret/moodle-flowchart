@@ -5,21 +5,25 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>כרך ב' - מד"ר מסדר גבוה - טכניקות פתרון</title>
   <style>
-    :root{
-      --edge:#6b7280;
-      --lvl1:#a78bfa;
-      --lvl2:#60a5fa;
-      --lvl3:#34d399;
-      --lvl4:#22d3ee;
-      --txt:#e5e7eb;
-      --w:200px;           /* רוחב צומת */
-      --pad:12px;
-      --gap:60px;          /* ריווח אופקי בין עמודות */
-      --v-gap:50px;        /* ריווח אנכי בין שכבות/פריטים */
-      --radius:16px;
-      --fs:14px;
-      --shadow:0 6px 18px rgba(0,0,0,.25);
-    }
+   :root{
+  /* צבעים כרגיל... */
+  --edge:#6b7280; --lvl1:#a78bfa; --lvl2:#60a5fa; --lvl3:#34d399; --lvl4:#22d3ee; --txt:#e5e7eb;
+
+  /* סקלת גודל כוללת */
+  --k: 1.35;          /* ↑ לכווץ ל-1.2 או להגדיל ל-1.5/1.6 לפי הצורך */
+
+  /* מידות בסיס */
+  --w0:200px; --pad0:12px; --gap0:60px; --v-gap0:50px; --radius0:16px; --fs0:14px; --shadow:0 6px 18px rgba(0,0,0,.25);
+
+  /* מידות מחושבות לפי הסקיילר */
+  --w: calc(var(--w0) * var(--k));
+  --pad: calc(var(--pad0) * var(--k));
+  --gap: calc(var(--gap0) * var(--k));
+  --v-gap: calc(var(--v-gap0) * var(--k));
+  --radius: calc(var(--radius0) * var(--k));
+  --fs: calc(var(--fs0) * var(--k));
+}
+
 
     *{box-sizing:border-box}
     html,body{height:100%}
@@ -30,7 +34,25 @@
     }
 
     .wrap{width:100vw; height:100vh; display:flex; flex-direction:column; gap:8px}
-    .toolbar{padding:10px 18px; display:flex; justify-content:space-between; align-items:center}
+    .toolbar{
+  padding:10px 18px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px; /* חדש */
+}
+    .zoom-controls button{
+  margin-inline-start:8px;
+  padding:4px 10px;
+  border-radius:8px;
+  border:1px solid #334155;
+  background:#0b1226;
+  color:var(--txt);
+  cursor:pointer;
+}
+.zoom-controls button:hover{filter:brightness(1.2)}
+
+
     .title{font-weight:700}
 
     .stage{flex:1; margin:0 18px 18px; border-radius:18px; overflow:auto;
@@ -42,9 +64,9 @@
     .layer{position:relative; display:flex; justify-content:center; gap:var(--gap); margin-bottom:var(--v-gap); z-index:1}
     .layer.grid{
   display:grid;
-  grid-template-columns:repeat(auto-fit, minmax(var(--w), var(--w)));
-  justify-content:center;
-  gap:var(--gap);
+  grid-template-columns: repeat(auto-fit, minmax(var(--w), var(--w)));
+  justify-content: space-evenly;  /* היה center */
+  gap: var(--gap);
 }
 
 
@@ -76,8 +98,13 @@ a.node:hover {
 <body>
   <div class="wrap">
     <div class="toolbar">
-      <div class="title">כרך ב' - מד"ר מסדר גבוה - טכניקות פתרון</div>
-    </div>
+  <div class="title">כרך ב' - מד"ר מסדר גבוה - טכניקות פתרון</div>
+  <div class="zoom-controls">
+    <button id="zout" title="הקטנה">A−</button>
+    <button id="zin"  title="הגדלה">A+</button>
+  </div>
+</div>
+
 
     <div class="stage">
       <div class="canvas" id="canvas">
