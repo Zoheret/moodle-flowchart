@@ -230,9 +230,46 @@ a.node:hover {
       });
     }
 
-    window.addEventListener('resize', drawEdges);
-    new ResizeObserver(drawEdges).observe(canvas);
-    window.addEventListener('load', () => setTimeout(drawEdges, 0));
+// נצייר בתזמון rAF כדי להימנע מריבוי ציורים
+const scheduleDraw = (() => {
+  let raf = null;
+  return () => {
+    if (raf) cancelAnimationFrame(raf);
+    raf = requestAnimationFrame(() => { raf = null; drawEdges(); });
+  };
+})();
+
+// שינוי גודל חלון (ברוב הדפדפנים גם בזום)
+window.addEventListener('resize', scheduleDraw);
+
+// אם יש visualViewport (כרום/מובייל) – שינויי זום ו־pinch מדווחים כאן
+if (window.visualViewport) {
+  visualViewport.addEventListener('resize', scheduleDraw);
+  visualViewport.addEventListener('scroll', scheduleDraw); // בעת pinch-zoom ה־viewport זז
+}
+
+// השגחת גודל הקנבס/פריסות
+new ResizeObserver(scheduleDraw).observe(canvas);
+
+// קיצורי מקשים לזום – נזמן ציור מיד אחרי
+document.addEventListener('keydown', (e) => {
+  if ((e.ctrlKey || e.metaKey) && ['+','-','0','='].includes(e.key)) {
+    setTimeout(scheduleDraw, 50);
+  }
+});
+
+// fallback: אם ה-devicePixelRatio השתנה (זום) – לצייר מחדש
+let lastDPR = window.devicePixelRatio;
+setInterval(() => {
+  if (window.devicePixelRatio !== lastDPR) {
+    lastDPR = window.devicePixelRatio;
+    scheduleDraw();
+  }
+}, 250);
+
+// ציור ראשון
+window.addEventListener('load', () => scheduleDraw());
+
   </script>
 </body>
 </html>
