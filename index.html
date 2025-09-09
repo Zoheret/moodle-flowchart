@@ -5,17 +5,6 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>כרך ב' - מד"ר מסדר גבוה - טכניקות פתרון</title>
   <style>
-    /* === PATCH 3: מיקום פרק 2/3 – סימטריה מעל העמודות הירוקות === */
-#L2{
-  /* אותו max-width כמו הגריד מתחת כדי שיתיישרו זה מעל זה */
-  max-width: 1600px;
-  margin-inline: auto;
-  display:flex;                 /* נשאר Flex כמו אצלך */
-  justify-content: space-between;
-  /* “משחק” קל כדי שלא יידבקו לקצוות אלא יעמדו מעל הבנים */
-  padding-inline: clamp(24px, 6vw, 120px);
-}
-
     :root{
       /* צבעים */
       --edge:#6b7280;
@@ -26,15 +15,17 @@
       --k: 1.45; /* אפשר לשנות ל-1.35/1.6 לפי הטעם */
 
       /* מידות בסיס */
-      --w0:200px; --pad0:12px; --gap0:60px; --v-gap0:50px; --radius0:16px; --fs0:14px; --shadow:0 6px 18px rgba(0,0,0,.25);
+      --w0:260px; /* ← היה 200px: הרחבנו כרטיסים לרוחב כדי לצמצם ירידות שורה */
+      --pad0:12px; --gap0:60px; --v-gap0:50px; --radius0:16px; --fs0:14px;
+      --shadow:0 6px 18px rgba(0,0,0,.25);
 
-      /* מידות מחושבות — שימי לב: רוחב נשאר קבוע */
-      --w: var(--w0);                              /* ← רוחב קופסה לא משתנה */
-      --pad: calc(var(--pad0) * var(--k));         /* ↑ עבה יותר לגובה */
-      --gap: var(--gap0);                          /* אין הרחבה לצדדים */
-      --v-gap: calc(var(--v-gap0) * var(--k));     /* ↑ ריווח אנכי */
+      /* מידות מחושבות — רוחב נשאר קבוע לפי w0; שאר המידות לפי k */
+      --w: var(--w0);
+      --pad: calc(var(--pad0) * var(--k));
+      --gap: var(--gap0);
+      --v-gap: calc(var(--v-gap0) * var(--k));
       --radius: var(--radius0);
-      --fs: calc(var(--fs0) * var(--k));           /* ↑ פונט גדול יותר */
+      --fs: calc(var(--fs0) * var(--k));
     }
 
     *{box-sizing:border-box}
@@ -67,39 +58,22 @@
     }
     .zoom-controls button:hover{filter:brightness(1.2)}
 
-    /* === PATCH 1.A: stage – ביטול גלילה אופקית ושמירה על גלילה אנכית בלבד === */
-.stage{
-  flex:1; 
-  margin:0 18px 18px; 
-  border-radius:18px;
-  /* גלילה רק אנכית */
-  overflow-y:auto;
-  overflow-x:hidden;
-  background:rgba(11,18,38,.85); 
-  border:1px solid #1f2937; 
-  box-shadow:0 12px 32px rgba(0,0,0,.25);
-  position:relative; 
-  padding:30px;
-}
-
+    .stage{
+      flex:1; margin:0 18px 18px; border-radius:18px; overflow:auto;
+      background:rgba(11,18,38,.85); border:1px solid #1f2937; box-shadow:0 12px 32px rgba(0,0,0,.25);
+      position:relative; padding:30px;
+    }
     .canvas{position:relative; isolation:isolate; padding:10px;}
     .edges{position:absolute; inset:0; z-index:1; pointer-events:none}
 
     .layer{position:relative; display:flex; justify-content:center; gap:var(--gap); margin-bottom:var(--v-gap); z-index:2}
 
-/* === PATCH 1.B: סנכרון רוחב לשכבות – כדי שמיקום פרק 2/3 יתיישר לעמודות מתחת === */
-.layer,
-/* === PATCH 2: גריד רספונסיבי – בלי רווחים מיותרים ובלי לגלול לרוחב === */
-.layer.grid{
-  display:grid;
-  /* כל עמודה מינימום רוחב כרטיס, ומותר לה להתרחב עד 1fr – ככה אין חורים לבנים */
-  grid-template-columns: repeat(auto-fit, minmax(var(--w), 1fr)));
-  justify-items: center;        /* הכרטיסים ממורכזים בתא שלהם */
-  align-items: start;
-  gap: var(--gap);
-}
-
-
+    .layer.grid{
+      display:grid;
+      grid-template-columns: repeat(auto-fit, minmax(var(--w), var(--w)));
+      justify-content: space-evenly;  /* לא מותחים לצדדים */
+      gap: var(--gap);
+    }
 
     .node{
       position:relative; z-index:3;               /* הצמתים מעל הקווים */
@@ -110,15 +84,15 @@
       text-align:center;
 
       font-size:var(--fs);
-      line-height:1.5;                            /* יותר ירידות שורה */
+      line-height:1.45;                           /* מעט קצר יותר כדי להוריד גובה */
       white-space:normal;
-      overflow-wrap:break-word; word-break:normal;/* שבירת מילים ארוכות */
-      min-height:64px;                            /* “עבה” ונעים גם בטקסט קצר */
+      overflow-wrap:break-word; word-break:normal;
+      min-height:60px;
 
       box-shadow:var(--shadow);
     }
 
-    /* היררכיית גדלים בין שכבות (גדול – אבל לא מרחיב לרוחב) */
+    /* היררכיית גדלים בין שכבות (פונט בלבד; הרוחב נשאר לפי --w0) */
     .lvl1{background:linear-gradient(135deg,#6d28d9,#8b5cf6); font-size:calc(var(--fs)*1.6)}
     .lvl2{background:linear-gradient(135deg,#2563eb,#60a5fa); font-size:calc(var(--fs)*1.4)}
     .lvl3{background:linear-gradient(135deg,#059669,#34d399); font-size:calc(var(--fs)*1.2)}
@@ -126,7 +100,7 @@
       background:linear-gradient(135deg,#0891b2,#22d3ee);
       color:#042430;
       font-size:calc(var(--fs)*1.05);
-      min-height:58px;
+      min-height:56px;
     }
 
     a.node{text-decoration:underline; display:block; cursor:pointer}
@@ -134,32 +108,18 @@
 
     .subcol{display:flex; flex-direction:column; align-items:center; gap:16px}
     .subcol .node.lvl4{margin-top:6px}
-    /* === PATCH 4: התאמות מסך בינוני וצפוף – בלי לגעת בפונט === */
-@media (max-width: 1200px){
-  :root{
-    --w: 320px;       /* רוחב כרטיס ריאלי למסך בינוני */
-    --gap: 28px;
-    --v-gap: 40px;
-  }
-  #L2{ padding-inline: clamp(16px, 5vw, 80px); }
-}
 
-@media (max-width: 900px){
-  :root{
-    --w: 300px;
-    --gap: 22px;
-    --v-gap: 32px;
-  }
-}
-
-@media (max-width: 700px){
-  :root{
-    --w: 280px;
-    --gap: 18px;
-    --v-gap: 28px;
-  }
-}
-
+    /* במסכים רחבים – מיישרים את "פרק 2/3" מעל 7 העמודות הירוקות */
+    @media (min-width:1400px){
+      #L2{
+        display:grid;
+        grid-template-columns: repeat(7, var(--w));
+        gap: var(--gap);
+        justify-content:center;
+      }
+      #chap2{ grid-column: 1 / span 4; justify-self:center; }
+      #chap3{ grid-column: 5 / span 3; justify-self:center; }
+    }
   </style>
 </head>
 <body>
@@ -362,7 +322,7 @@
     if (zin)  zin.addEventListener('click',  () => setK(getK() + 0.1));
     if (zout) zout.addEventListener('click', () => setK(getK() - 0.1));
 
-    /* ציור ראשון */
+    /* ציור ראשון + על שינוי גודל */
     window.addEventListener('load', () => scheduleDraw());
     window.addEventListener('resize', scheduleDraw);
   </script>
